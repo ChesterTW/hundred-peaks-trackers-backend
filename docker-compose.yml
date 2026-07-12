@@ -1,0 +1,14 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5108:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/serviceAccountKey.json
+    volumes:
+      - ./src/HundredPeaksTrackers.Api/appsettings.Development.json:/app/appsettings.Development.json:ro
+      - ./serviceAccountKey.json:/app/secrets/serviceAccountKey.json:ro
+    restart: unless-stopped
