@@ -53,16 +53,18 @@ public class AuthController : ControllerBase
             return Forbid();
         }
 
-        var token = GenerateJwt(googleSub, payload.Email);
+        var token = GenerateJwt(googleSub, payload.Email, payload.Name, payload.Picture);
         return Ok(new AuthResponse { Token = token });
     }
 
-    private string GenerateJwt(string googleSub, string email)
+    private string GenerateJwt(string googleSub, string email, string name = "", string picture = "")
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, googleSub),
             new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(JwtRegisteredClaimNames.Name, name ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Picture, picture ?? string.Empty),
         };
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SigningKey));
