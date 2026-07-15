@@ -45,12 +45,17 @@ public class AuthController : ControllerBase
         }
 
         var googleSub = payload.Subject;
-        var userSnapshot = await _db.Collection("users").Document(googleSub).GetSnapshotAsync();
+        var userDoc = _db.Collection("users").Document(googleSub);
+        var userSnapshot = await userDoc.GetSnapshotAsync();
 
-        // 單一使用者 app：firestoreUid 對應既有 Firebase Auth uid，需手動在 Firestore 建立（見設計文件 7.1），不自動建立新使用者
+        // 開放註冊：首次登入自動建立使用者文件，firestoreUid 預設等於自己的 googleSub
         if (!userSnapshot.Exists)
         {
-            return Forbid();
+            await userDoc.SetAsync(new Dictionary<string, object?>
+            {
+                ["email"] = payload.Email,
+                ["firestoreUid"] = googleSub,
+            });
         }
 
         var token = GenerateJwt(googleSub, payload.Email, payload.Name, payload.Picture);
